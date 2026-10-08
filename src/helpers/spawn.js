@@ -251,7 +251,8 @@ const runQoderRequest = ({
         ) {
           if (hasVisibleAssistantText(data)) sawAssistantMessage = true;
           onChunk(data);
-        } else {
+        } else if (data.type === "result" && !data.is_error) {
+          // System hook events may contain text, but are not model output.
           const fallbackText = extractEventText(data);
           if (!fallbackText || sawAssistantMessage) continue;
           if (fallbackText === lastSyntheticText) continue;
@@ -292,7 +293,7 @@ const runQoderRequest = ({
       ) {
         if (hasVisibleAssistantText(data)) sawAssistantMessage = true;
         onChunk(data);
-      } else {
+      } else if (data.type === "result" && !data.is_error) {
         const fallbackText = extractEventText(data);
         if (!fallbackText || sawAssistantMessage) return;
         if (fallbackText === lastSyntheticText) return;

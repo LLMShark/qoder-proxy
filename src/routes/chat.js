@@ -183,6 +183,9 @@ router.post("/", (req, res) => {
             code,
             stderr?.substring(0, 200),
           );
+          res.write(`data: ${JSON.stringify({ error: { message: `qodercli exited with code ${code}`, type: "api_error" } })}\n\n`);
+          res.end();
+          return;
         }
 
         // Check if the full accumulated text is actually a tool call
@@ -207,6 +210,9 @@ router.post("/", (req, res) => {
             };
             res.write(`data: ${JSON.stringify(tcChunk)}\n\n`);
             lastFinishReason = "tool_calls";
+          } else if (fullStreamText) {
+            // A response to a tool-enabled request can still be plain text.
+            res.write(`data: ${JSON.stringify(buildStreamChunk(fullStreamText, model, id))}\n\n`);
           }
         }
 
